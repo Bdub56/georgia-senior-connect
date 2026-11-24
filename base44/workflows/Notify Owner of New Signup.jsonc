@@ -1,0 +1,55 @@
+{
+  "trigger": {
+    "condition": "${ true }",
+    "config": {
+      "trigger_type": "hook",
+      "events": [],
+      "hook_type": "auth_before_admission"
+    }
+  },
+  "description": "Emails the app owner whenever a new user is admitted to the app.",
+  "name": "Notify Owner of New Signup",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "notify_owner_of_new_signup",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_signup_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "notifyNewSignup",
+            "args": {
+              "email": "${ .trigger.data.email }",
+              "full_name": "${ .trigger.data.full_name }",
+              "auth_method": "${ .trigger.data.auth_method }"
+            }
+          },
+          "then": "allow_signup",
+          "x-base44": {
+            "title": "Email the owner",
+            "description": "Sends the new account details"
+          }
+        }
+      },
+      {
+        "allow_signup": {
+          "call": "calculate_field",
+          "with": {
+            "field": "response",
+            "value": {
+              "allow": true
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Continue signup"
+          }
+        }
+      }
+    ]
+  }
+}

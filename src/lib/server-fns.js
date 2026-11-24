@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth-middleware";
 import { CATEGORIES, COST_TYPES, NEEDS, zipToCounties } from "@/lib/georgia-data";
-import { notifyCuratorsOfReview } from "@/lib/notify.server";
+import { notifyCuratorsOfReview, notifyOwnerOfVisit } from "@/lib/notify.server";
 
 const MAX_SERVICES = 400;
 
@@ -242,4 +243,68 @@ export const matchServices = createServerFn({ method: "POST" })
     tips.push("Bring photo ID, Social Security award letters, proof of Georgia residency, and recent income statements to every intake call.");
 
     return { services, tips };
+  });
+
+const sha256 = async (value) => {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+};
+
+// Calendar day in Georgia, so "first visit today" resets at midnight Eastern.
+const easternDayKey = (date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+
+// Called once per page load by the browser. Alerts the owner only on a
+// visitor's first visit of the day, and never about the owner's own visits.
+export const recordVisit = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      path: z.string().max(200).optional(),
+      referrer: z.string().max(300).optional(),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const base44 = context.getBase44();
+    const headers = getRequest()?.headers;
+    const ip = (headers?.get("cf-connecting-ip") || headers?.get("x-forwarded-for") || "").split(",")[0].trim();
+    const agent = headers?.get("user-agent") || "";
+    const visitorKey = await sha256(`${ip}|${agent}`);
+    const dayKey = easternDayKey(new Date());
+
+    const seen = await base44.asServiceRole.entities.VisitLog.filter(
+      { visitor_key: visitorKey, day_key: dayKey },
+      { limit: 1 },
+    );
+    if (seen.items?.length) return { notified: false };
+
+    const user = await base44.auth.me().catch((error) => {
+      if (error?.status === 401 || error?.status === 403) return null;
+      throw error;
+    });
+
+    await base44.asServiceRole.entities.VisitLog.create({
+      visitor_key: visitorKey,
+      day_key: dayKey,
+      path: data.path || "/",
+      referrer: data.referrer || "",
+      user_email: user?.email || "",
+    });
+
+    if (user?.role === "admin") return { notified: false };
+
+    await notifyOwnerOfVisit(base44, {
+      path: data.path,
+      referrer: data.referrer,
+      userEmail: user?.email,
+      signedIn: Boolean(user),
+    }).catch(() => {});
+
+    return { notified: true };
   });

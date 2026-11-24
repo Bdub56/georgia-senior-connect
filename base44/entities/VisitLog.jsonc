@@ -1,0 +1,52 @@
+{
+  "name": "VisitLog",
+  "type": "object",
+  "properties": {
+    "visitor_key": {
+      "type": "string",
+      "description": "Hashed visitor fingerprint. The raw IP address is never stored."
+    },
+    "day_key": {
+      "type": "string",
+      "description": "Calendar day in America/New_York, formatted YYYY-MM-DD"
+    },
+    "path": {
+      "type": "string",
+      "description": "First page the visitor opened that day"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "Where the visitor arrived from, when known"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the signed-in visitor, when there is one"
+    }
+  },
+  "required": [
+    "visitor_key",
+    "day_key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
