@@ -1,0 +1,38 @@
+<mjml>
+  <mj-head>
+    <mj-title>New {{stars}}-star review for {{service_name}}</mj-title>
+    <mj-preview>{{author_name}} rated {{service_name}} {{stars}} out of 5 stars.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Atkinson Hyperlegible', Arial, Helvetica, sans-serif" />
+      <mj-text color="#000000" font-size="16px" line-height="1.6" padding="0px" />
+      <mj-button background-color="#1f3b61" color="#fdfbf7" border-radius="4px" font-weight="700" inner-padding="14px 26px" align="left" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f6f7f9">
+    <mj-section background-color="#1f3b61" padding="22px 48px">
+      <mj-column>
+        <mj-image src="https://media.base44.com/images/public/6b05e58849590bf5a83f5755/5e50d5a64179028e2f3a618692c96fa9_logo.png" alt="Georgia Senior Connect" width="56px" align="left" padding="0 0 10px 0" />
+        <mj-text color="#fdfbf7" font-family="Fraunces, Georgia, serif" font-size="18px" font-weight="700" padding="0">Georgia Senior Link</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" padding="32px">
+      <mj-column>
+        <mj-text color="#c2410c" font-size="11px" font-weight="700" letter-spacing="2px" text-transform="uppercase" padding="0 0 10px 0">New review submitted</mj-text>
+        <mj-text color="#1f3b61" font-family="Fraunces, Georgia, serif" font-size="28px" line-height="1.2" font-weight="700" padding="0 0 10px 0">Someone just reviewed {{service_name}}</mj-text>
+        <mj-text color="#6b7280" font-size="16px" padding="0 0 22px 0">{{author_name}} left a {{stars}}-star rating. Here is what they wrote.</mj-text>
+        <mj-text font-size="13px" color="#6b7280" padding="0 0 4px 0">Rating</mj-text>
+        <mj-text font-size="15px" font-weight="700" padding="0 0 14px 0">{{stars}} out of 5 stars</mj-text>
+        <mj-text font-size="13px" color="#6b7280" padding="0 0 4px 0">From</mj-text>
+        <mj-text font-size="15px" padding="0 0 18px 0">{{author_name}} ({{author_role}})</mj-text>
+        <mj-text color="#6b7280" font-size="13px" padding="0 0 6px 0">Submitted {{submitted_at}}</mj-text>
+        <mj-text font-size="15px" line-height="1.6" padding="0 0 24px 0">{{review_body}}</mj-text>
+        <mj-button href="{{service_url}}" align="left">Open the listing</mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#1f3b61" padding="20px 32px">
+      <mj-column>
+        <mj-text color="#fdfbf7" font-size="12px" line-height="1.5" padding="0">Georgia Senior Link. You receive this because you curate the directory.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
