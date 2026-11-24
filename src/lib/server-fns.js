@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth-middleware";
 import { CATEGORIES, COST_TYPES, NEEDS, zipToCounties } from "@/lib/georgia-data";
+import { notifyCuratorsOfReview } from "@/lib/notify.server";
 
 const MAX_SERVICES = 400;
 
@@ -120,7 +121,11 @@ export const saveReview = createServerFn({ method: "POST" })
     if (existing.items?.length) {
       return base44.entities.Review.update(existing.items[0].id, payload);
     }
-    return base44.entities.Review.create(payload);
+
+    const created = await base44.entities.Review.create(payload);
+    // Alert the curator; a mail failure must never undo the review the person just wrote.
+    await notifyCuratorsOfReview(base44, created).catch(() => {});
+    return created;
   });
 
 export const deleteReview = createServerFn({ method: "POST" })

@@ -1,0 +1,40 @@
+{
+  "name": "New Review Alert",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "new_review_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_review_alert": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/send-review-alert",
+            "body": {
+              "data": "${ .trigger.data }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Email the curator",
+            "description": "New review notification"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Review"
+    }
+  },
+  "description": "Emails the curator whenever a community member posts a new review on a service listing."
+}
