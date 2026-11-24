@@ -282,7 +282,7 @@ export const recordVisit = createServerFn({ method: "POST" })
       { visitor_key: visitorKey, day_key: dayKey },
       { limit: 1 },
     );
-    if (seen.items?.length) return { notified: false };
+    const firstVisitToday = !seen.items?.length;
 
     const user = await base44.auth.me().catch((error) => {
       if (error?.status === 401 || error?.status === 403) return null;
@@ -292,14 +292,16 @@ export const recordVisit = createServerFn({ method: "POST" })
     await base44.asServiceRole.entities.VisitLog.create({
       visitor_key: visitorKey,
       day_key: dayKey,
+      ip,
       path: data.path || "/",
       referrer: data.referrer || "",
       user_email: user?.email || "",
     });
 
-    if (user?.role === "admin") return { notified: false };
+    if (!firstVisitToday || user?.role === "admin") return { notified: false };
 
     await notifyOwnerOfVisit(base44, {
+      ip,
       path: data.path,
       referrer: data.referrer,
       userEmail: user?.email,

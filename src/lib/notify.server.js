@@ -55,6 +55,7 @@ export async function notifyOwnerOfVisit(base44, visit) {
       intro: "This is the first visit from this visitor today.",
       rows: [
         ["Page", trim(visit.path, 200) || "/"],
+        ["IP address", trim(visit.ip, 60) || "Not available"],
         ["Came from", trim(visit.referrer, 300) || "Direct visit"],
         ["Signed in", visit.signedIn ? trim(visit.userEmail, 200) || "Yes" : "Not signed in"],
         ["When", formatWhen(new Date().toISOString())],

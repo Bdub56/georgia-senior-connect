@@ -4,15 +4,19 @@
   "properties": {
     "visitor_key": {
       "type": "string",
-      "description": "Hashed visitor fingerprint. The raw IP address is never stored."
+      "description": "Hashed visitor fingerprint used to spot repeat visits"
     },
     "day_key": {
       "type": "string",
       "description": "Calendar day in America/New_York, formatted YYYY-MM-DD"
     },
+    "ip": {
+      "type": "string",
+      "description": "IP address the device connected from"
+    },
     "path": {
       "type": "string",
-      "description": "First page the visitor opened that day"
+      "description": "Page the visitor opened"
     },
     "referrer": {
       "type": "string",
