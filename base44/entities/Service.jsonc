@@ -1,0 +1,135 @@
+{
+  "name": "Service",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Program or organization name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Meals & Nutrition",
+        "Healthcare & Medicare",
+        "Caregiver & Respite",
+        "Housing & Utilities",
+        "Transportation",
+        "Legal & Elder Protection",
+        "Senior Centers",
+        "Start Here & Help Lines"
+      ],
+      "enumColors": [
+        "yellow",
+        "red",
+        "pink",
+        "blue",
+        "purple",
+        "green",
+        "gray",
+        "blue"
+      ],
+      "description": "Primary service category"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the service provides, in plain language"
+    },
+    "counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Counties served, or the single value Statewide"
+    },
+    "region": {
+      "type": "string",
+      "description": "Area Agency on Aging region"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number"
+    },
+    "phone_alt": {
+      "type": "string",
+      "description": "Secondary or toll-free phone number"
+    },
+    "website": {
+      "type": "string",
+      "description": "Official website URL"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address where applicable"
+    },
+    "hours": {
+      "type": "string",
+      "description": "Hours of operation"
+    },
+    "eligibility": {
+      "type": "string",
+      "description": "Age, income, and residency rules"
+    },
+    "cost_type": {
+      "type": "string",
+      "enum": [
+        "Free",
+        "Sliding scale",
+        "Income-based",
+        "Medicaid",
+        "Varies"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "yellow",
+        "blue",
+        "gray"
+      ],
+      "description": "Cost structure"
+    },
+    "waitlist": {
+      "type": "boolean",
+      "description": "Whether the program commonly carries a waitlist"
+    },
+    "waitlist_note": {
+      "type": "string",
+      "description": "Waitlist detail or 2026 rule changes"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Extra guidance for callers"
+    },
+    "keywords": {
+      "type": "string",
+      "description": "Extra search terms"
+    },
+    "editor_rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Official curator rating from 0 to 5"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

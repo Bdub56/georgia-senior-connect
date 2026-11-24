@@ -1,0 +1,69 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "description": "Service the review belongs to"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Service name at the time of writing"
+    },
+    "stars": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Rating from 1 to 5 stars"
+    },
+    "body": {
+      "type": "string",
+      "description": "Optional written review"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the reviewer"
+    },
+    "author_role": {
+      "type": "string",
+      "enum": [
+        "Senior or family",
+        "Caregiver",
+        "Social worker or APS",
+        "Other"
+      ],
+      "enumColors": [
+        "green",
+        "pink",
+        "blue",
+        "gray"
+      ],
+      "description": "Who is reviewing"
+    }
+  },
+  "required": [
+    "service_id",
+    "stars"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
