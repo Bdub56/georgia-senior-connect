@@ -249,14 +249,17 @@ function AdminPage() {
         </section>
       </div>
 
-      <ServiceForm
-        open={formOpen}
-        onOpenChange={(open) => {
-          setFormOpen(open);
-          if (!open) setEditing(null);
-        }}
-        service={editing}
-      />
+      {formOpen ? (
+        <ServiceForm
+          key={editing?.id || "new"}
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setEditing(null);
+          }}
+          service={editing}
+        />
+      ) : null}
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => (!open ? setPendingDelete(null) : null)}>
         <AlertDialogContent>

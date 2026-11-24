@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Plus, Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
+import { useAuth } from "@/lib/AuthContext";
 import { CATEGORIES, zipToCounties } from "@/lib/georgia-data";
 import { listServices } from "@/lib/server-fns";
 
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/_site/services/")({
 function ServicesPage() {
   const { q, category, county } = Route.useSearch();
   const { services } = Route.useLoaderData();
+  const { user } = useAuth();
   const navigate = useNavigate({ from: "/services" });
   const [term, setTerm] = useState(q || "");
 
@@ -41,14 +43,24 @@ function ServicesPage() {
 
   return (
     <div className="wrap py-10">
-      <div className="max-w-2xl">
-        <p className="eyebrow">Directory</p>
-        <h1 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-4xl">
-          Find services in Georgia
-        </h1>
-        <p className="mt-3 text-[1rem] leading-relaxed text-muted-foreground">
-          Search by county, ZIP code, or service name, or narrow it down by category.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-2xl">
+          <p className="eyebrow">Directory</p>
+          <h1 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-4xl">
+            Find services in Georgia
+          </h1>
+          <p className="mt-3 text-[1rem] leading-relaxed text-muted-foreground">
+            Search by county, ZIP code, or service name, or narrow it down by category.
+          </p>
+        </div>
+        {user?.role === "admin" ? (
+          <Link
+            to="/admin"
+            className="btn-accent tap inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-bold"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" /> Add a service
+          </Link>
+        ) : null}
       </div>
 
       <form
