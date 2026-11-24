@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Phone, LifeBuoy } from "lucide-react";
 import AuthMenu from "@/components/AuthMenu";
+import FooterLegal from "@/components/FooterLegal";
 
 const NAV = [
   { label: "Find services", to: "/services" },
@@ -132,6 +133,7 @@ export default function Layout({ children }) {
             </p>
           </div>
         </div>
+        <FooterLegal />
       </footer>
     </div>
   );
