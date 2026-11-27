@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Clock,
   LogIn,
+  ExternalLink,
 } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import ReviewList from "@/components/ReviewList";
@@ -158,6 +159,45 @@ function ServiceDetailPage() {
               </div>
             ) : null}
           </dl>
+
+          {service.google_reviews_summary ? (
+            <div className="mt-6 rounded-xl border border-border/80 bg-secondary/40 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[0.78rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Google reviews
+                </p>
+                {service.google_rating > 0 ? (
+                  <span className="inline-flex items-center gap-2 text-[0.9rem] font-bold text-foreground">
+                    <StarRating value={service.google_rating} size="sm" />
+                    {Number(service.google_rating).toFixed(1)}
+                    {service.google_review_count ? (
+                      <span className="font-semibold text-muted-foreground">
+                        ({service.google_review_count})
+                      </span>
+                    ) : null}
+                  </span>
+                ) : null}
+              </div>
+              {service.google_listing_name ? (
+                <p className="mt-1.5 text-[0.85rem] font-semibold text-foreground/80">
+                  Google listing: {service.google_listing_name}
+                </p>
+              ) : null}
+              <p className="mt-2 text-[0.95rem] leading-relaxed text-foreground/85">
+                {service.google_reviews_summary}
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  service.google_listing_name || service.name,
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary underline-offset-4 hover:underline"
+              >
+                See it on Google Maps <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            </div>
+          ) : null}
         </article>
 
         <aside className="space-y-5 lg:sticky lg:top-24">

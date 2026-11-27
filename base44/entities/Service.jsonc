@@ -108,6 +108,24 @@
       "minimum": 0,
       "maximum": 5,
       "description": "Official curator rating from 0 to 5"
+    },
+    "google_listing_name": {
+      "type": "string",
+      "description": "Matched Google Maps listing name"
+    },
+    "google_rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Average Google review rating"
+    },
+    "google_review_count": {
+      "type": "number",
+      "description": "Number of Google reviews behind the rating"
+    },
+    "google_reviews_summary": {
+      "type": "string",
+      "description": "Short summary of what Google reviewers say"
     }
   },
   "required": [
