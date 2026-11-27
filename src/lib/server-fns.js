@@ -30,7 +30,10 @@ const matchesTerm = (service, term) => {
   return haystack.includes(term);
 };
 
-const byRating = (a, b) => (b.editor_rating || 0) - (a.editor_rating || 0) || a.name.localeCompare(b.name);
+const byRating = (a, b) =>
+  (b.editor_rating || 0) - (a.editor_rating || 0) ||
+  (b.google_rating || 0) - (a.google_rating || 0) ||
+  a.name.localeCompare(b.name);
 
 export const listServices = createServerFn({ method: "GET" })
   .validator(

@@ -70,6 +70,16 @@ export default function ServiceCard({ service, showPhone = true }) {
         </div>
       ) : null}
 
+      {service.google_rating > 0 ? (
+        <div className="mt-4 flex items-center gap-2">
+          <StarRating value={service.google_rating} size="sm" />
+          <span className="text-[0.8rem] font-semibold text-muted-foreground">
+            {Number(service.google_rating).toFixed(1)} · {service.google_review_count}{" "}
+            {service.google_review_count === 1 ? "Google review" : "Google reviews"}
+          </span>
+        </div>
+      ) : null}
+
       <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4">
         {showPhone && service.phone ? (
           <a

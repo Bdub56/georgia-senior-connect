@@ -68,6 +68,12 @@ function ServiceDetailPage() {
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> Official {Number(service.editor_rating).toFixed(1)}
               </span>
             ) : null}
+            {service.google_rating > 0 ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[0.78rem] font-bold text-foreground">
+                Google {Number(service.google_rating).toFixed(1)} · {service.google_review_count}{" "}
+                {service.google_review_count === 1 ? "review" : "reviews"}
+              </span>
+            ) : null}
             <span className="inline-flex items-center gap-2 text-[0.9rem] font-semibold text-muted-foreground">
               <StarRating value={average} size="sm" />
               {reviewCount ? `${average.toFixed(1)} from ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}` : "No community reviews yet"}
@@ -87,6 +93,22 @@ function ServiceDetailPage() {
           </div>
 
           <p className="mt-6 text-[1.02rem] leading-relaxed text-foreground/85">{service.description}</p>
+
+          {service.google_reviews_summary ? (
+            <div className="mt-6 rounded-xl border border-border/70 bg-secondary/50 p-4">
+              <p className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                What Google reviewers say
+              </p>
+              <p className="mt-1.5 text-[0.92rem] leading-relaxed text-foreground/85">
+                {service.google_reviews_summary}
+              </p>
+              {service.google_listing_name ? (
+                <p className="mt-2 text-[0.78rem] text-muted-foreground">
+                  Taken from the Google listing: {service.google_listing_name}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           {service.waitlist && service.waitlist_note ? (
             <div className="mt-6 flex gap-3 rounded-xl border border-[#f7cbb0] bg-[#fdf1e9] p-4">
