@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus, Pencil, Trash2, Search, ShieldCheck, Loader2, Star, MessageSquare } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ShieldCheck, Loader2, Star, MessageSquare, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import StarRating from "@/components/StarRating";
 import ServiceForm from "@/components/admin/ServiceForm";
@@ -16,17 +16,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deleteService, listRecentVisits, listReviews, listServices } from "@/lib/server-fns";
+import {
+  approveServiceSuggestion,
+  declineServiceSuggestion,
+  deleteService,
+  listRecentVisits,
+  listReviews,
+  listServiceSuggestions,
+  listServices,
+} from "@/lib/server-fns";
 
 export const Route = createFileRoute("/_authed/admin")({
   ssr: false,
   loader: async () => {
-    const [services, reviews, visits] = await Promise.all([
+    const [services, reviews, visits, suggestions] = await Promise.all([
       listServices({ data: {} }),
       listReviews({ data: { limit: 30 } }),
       listRecentVisits({ data: { limit: 40 } }),
+      listServiceSuggestions(),
     ]);
-    return { services, reviews, visits };
+    return { services, reviews, visits, suggestions };
   },
   head: () => ({ meta: [{ title: "Curator console — Georgia Senior Link" }] }),
   component: AdminPage,
@@ -54,10 +63,12 @@ const formatStamp = (value) => {
 
 function AdminPage() {
   const { user } = Route.useRouteContext();
-  const { services, reviews, visits } = Route.useLoaderData();
+  const { services, reviews, visits, suggestions } = Route.useLoaderData();
   const router = useRouter();
   const queryClient = useQueryClient();
   const remove = useServerFn(deleteService);
+  const approve = useServerFn(approveServiceSuggestion);
+  const decline = useServerFn(declineServiceSuggestion);
 
   const [term, setTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
@@ -73,6 +84,26 @@ function AdminPage() {
       await router.invalidate();
     },
     onError: (error) => toast.error(error?.message || "That service could not be removed."),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id) => approve({ data: { id } }),
+    onSuccess: async () => {
+      toast.success("Service added to the directory");
+      await queryClient.invalidateQueries();
+      await router.invalidate();
+    },
+    onError: (error) => toast.error(error?.message || "That suggestion could not be approved."),
+  });
+
+  const declineMutation = useMutation({
+    mutationFn: (id) => decline({ data: { id } }),
+    onSuccess: async () => {
+      toast.success("Suggestion dismissed");
+      await queryClient.invalidateQueries();
+      await router.invalidate();
+    },
+    onError: (error) => toast.error(error?.message || "That suggestion could not be dismissed."),
   });
 
   const stats = useMemo(() => {
@@ -262,6 +293,63 @@ function AdminPage() {
           </ul>
         </section>
       </div>
+
+      {suggestions.length ? (
+        <section className="card-quiet mt-6 overflow-hidden">
+          <div className="border-b border-border/70 p-4">
+            <h2 className="font-display text-lg font-semibold text-foreground">Suggested services</h2>
+            <p className="mt-0.5 text-[0.82rem] text-muted-foreground">
+              Sent in by people who use the directory. Approving adds the listing to the public directory.
+            </p>
+          </div>
+          <ul className="divide-y divide-border/70">
+            {suggestions.map((suggestion) => (
+              <li key={suggestion.id} className="p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[0.98rem] font-bold text-foreground">{suggestion.name}</p>
+                    <p className="mt-0.5 text-[0.8rem] font-semibold text-muted-foreground">
+                      {suggestion.category}
+                      {suggestion.counties?.length ? ` · ${suggestion.counties.slice(0, 3).join(", ")}` : ""}
+                      {suggestion.phone ? ` · ${suggestion.phone}` : ""}
+                    </p>
+                    {suggestion.description ? (
+                      <p className="mt-1.5 text-[0.9rem] leading-relaxed text-foreground/80">
+                        {suggestion.description}
+                      </p>
+                    ) : null}
+                    {suggestion.notes ? (
+                      <p className="mt-1 text-[0.85rem] text-muted-foreground">Why: {suggestion.notes}</p>
+                    ) : null}
+                    <p className="mt-1 text-[0.78rem] text-muted-foreground">
+                      From {suggestion.submitter_name || suggestion.submitter_email || "a visitor"} ·{" "}
+                      {formatDate(suggestion.created_date)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => approveMutation.mutate(suggestion.id)}
+                      disabled={approveMutation.isPending || declineMutation.isPending}
+                      className="tap inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                    >
+                      <Check className="h-4 w-4" aria-hidden="true" /> Approve
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => declineMutation.mutate(suggestion.id)}
+                      disabled={approveMutation.isPending || declineMutation.isPending}
+                      className="tap inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-bold text-foreground hover:bg-secondary disabled:opacity-60"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" /> Decline
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="card-quiet mt-6 overflow-hidden">
         <div className="border-b border-border/70 p-4">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Plus, Search, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Plus, Search, SlidersHorizontal, Loader2, Lightbulb } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import { useAuth } from "@/lib/AuthContext";
 import { CATEGORIES, zipToCounties } from "@/lib/georgia-data";
@@ -53,14 +53,22 @@ function ServicesPage() {
             Search by county, ZIP code, or service name, or narrow it down by category.
           </p>
         </div>
-        {user?.role === "admin" ? (
+        <div className="flex flex-wrap items-center gap-2">
           <Link
-            to="/admin"
-            className="btn-accent tap inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-bold"
+            to="/suggest-service"
+            className="tap inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-card px-4 py-3 text-[0.9rem] font-bold text-primary hover:bg-secondary"
           >
-            <Plus className="h-4 w-4" aria-hidden="true" /> Add a service
+            <Lightbulb className="h-4 w-4" aria-hidden="true" /> Suggest a service
           </Link>
-        ) : null}
+          {user?.role === "admin" ? (
+            <Link
+              to="/admin"
+              className="btn-accent tap inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-bold"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" /> Add a service
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <form

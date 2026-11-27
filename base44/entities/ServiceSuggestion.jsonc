@@ -1,0 +1,111 @@
+{
+  "name": "ServiceSuggestion",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Program or organization name as suggested"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Meals & Nutrition",
+        "Healthcare & Medicare",
+        "Caregiver & Respite",
+        "Housing & Utilities",
+        "Transportation",
+        "Legal & Elder Protection",
+        "Senior Centers",
+        "Start Here & Help Lines"
+      ],
+      "enumColors": [
+        "yellow",
+        "red",
+        "pink",
+        "blue",
+        "purple",
+        "green",
+        "gray",
+        "blue"
+      ],
+      "description": "Category the suggestion belongs to"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the program provides"
+    },
+    "counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Counties the program serves"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "website": {
+      "type": "string",
+      "description": "Website address"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Why the person is suggesting it"
+    },
+    "submitter_name": {
+      "type": "string",
+      "description": "Name of the person who sent the suggestion"
+    },
+    "submitter_email": {
+      "type": "string",
+      "description": "Email of the person who sent the suggestion"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "declined"
+      ],
+      "enumColors": [
+        "yellow",
+        "green",
+        "gray"
+      ],
+      "default": "pending",
+      "description": "Curator decision on the suggestion"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

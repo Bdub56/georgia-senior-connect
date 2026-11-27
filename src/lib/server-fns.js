@@ -208,6 +208,82 @@ export const deleteService = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+const suggestionInput = z.object({
+  name: z.string().min(2).max(180),
+  category: z.enum(CATEGORIES),
+  counties: z.string().max(400).optional(),
+  phone: z.string().max(60).optional(),
+  website: z.string().max(400).optional(),
+  description: z.string().max(1500).optional(),
+  notes: z.string().max(1200).optional(),
+});
+
+export const submitServiceSuggestion = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(suggestionInput)
+  .handler(async ({ data, context }) => {
+    const base44 = context.getBase44();
+    const counties = (data.counties || "")
+      .split(",")
+      .map((county) => county.trim())
+      .filter(Boolean)
+      .slice(0, 20);
+
+    return base44.entities.ServiceSuggestion.create({
+      name: data.name.trim(),
+      category: data.category,
+      counties,
+      phone: (data.phone || "").trim(),
+      website: (data.website || "").trim(),
+      description: (data.description || "").trim(),
+      notes: (data.notes || "").trim(),
+      submitter_name: context.user.full_name || "",
+      submitter_email: context.user.email || "",
+      status: "pending",
+    });
+  });
+
+export const listServiceSuggestions = createServerFn({ method: "GET" })
+  .middleware([requireUser])
+  .handler(async ({ context }) => {
+    adminOnly(context.user);
+    const page = await context
+      .getBase44()
+      .entities.ServiceSuggestion.filter({ status: "pending" }, { limit: 50, sort: "-created_date" });
+    return page.items || [];
+  });
+
+export const approveServiceSuggestion = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(z.object({ id: z.string().min(1).max(120) }))
+  .handler(async ({ data, context }) => {
+    adminOnly(context.user);
+    const base44 = context.getBase44();
+    const suggestion = await base44.entities.ServiceSuggestion.get(data.id);
+
+    const service = await base44.entities.Service.create({
+      name: suggestion.name,
+      category: suggestion.category,
+      description: suggestion.description || "",
+      counties: suggestion.counties || [],
+      phone: suggestion.phone || "",
+      website: suggestion.website || "",
+      notes: suggestion.notes || "",
+      cost_type: "Varies",
+    });
+
+    await base44.entities.ServiceSuggestion.update(data.id, { status: "approved" });
+    return service;
+  });
+
+export const declineServiceSuggestion = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(z.object({ id: z.string().min(1).max(120) }))
+  .handler(async ({ data, context }) => {
+    adminOnly(context.user);
+    return context.getBase44().entities.ServiceSuggestion.update(data.id, { status: "declined" });
+  });
+
 export const matchServices = createServerFn({ method: "POST" })
   .validator(
     z.object({
