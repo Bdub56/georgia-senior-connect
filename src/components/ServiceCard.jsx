@@ -61,12 +61,14 @@ export default function ServiceCard({ service, showPhone = true }) {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <StarRating value={service.editor_rating || 0} size="sm" />
-        <span className="text-[0.8rem] font-semibold text-muted-foreground">
-          {Number(service.editor_rating || 0).toFixed(1)} editor rating
-        </span>
-      </div>
+      {service.editor_rating > 0 ? (
+        <div className="mt-4 flex items-center gap-2">
+          <StarRating value={service.editor_rating} size="sm" />
+          <span className="text-[0.8rem] font-semibold text-muted-foreground">
+            {Number(service.editor_rating).toFixed(1)} editor rating
+          </span>
+        </div>
+      ) : null}
 
       <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4">
         {showPhone && service.phone ? (
