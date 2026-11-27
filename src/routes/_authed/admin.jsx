@@ -16,16 +16,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deleteService, listReviews, listServices } from "@/lib/server-fns";
+import { deleteService, listRecentVisits, listReviews, listServices } from "@/lib/server-fns";
 
 export const Route = createFileRoute("/_authed/admin")({
   ssr: false,
   loader: async () => {
-    const [services, reviews] = await Promise.all([
+    const [services, reviews, visits] = await Promise.all([
       listServices({ data: {} }),
       listReviews({ data: { limit: 30 } }),
+      listRecentVisits({ data: { limit: 40 } }),
     ]);
-    return { services, reviews };
+    return { services, reviews, visits };
   },
   head: () => ({ meta: [{ title: "Curator console — Georgia Senior Link" }] }),
   component: AdminPage,
@@ -38,9 +39,22 @@ const formatDate = (value) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 };
 
+const formatStamp = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  });
+};
+
 function AdminPage() {
   const { user } = Route.useRouteContext();
-  const { services, reviews } = Route.useLoaderData();
+  const { services, reviews, visits } = Route.useLoaderData();
   const router = useRouter();
   const queryClient = useQueryClient();
   const remove = useServerFn(deleteService);
@@ -248,6 +262,32 @@ function AdminPage() {
           </ul>
         </section>
       </div>
+
+      <section className="card-quiet mt-6 overflow-hidden">
+        <div className="border-b border-border/70 p-4">
+          <h2 className="font-display text-lg font-semibold text-foreground">Recent visits</h2>
+          <p className="mt-0.5 text-[0.82rem] text-muted-foreground">
+            One row per page load, newest first, with the IP address the device connected from.
+          </p>
+        </div>
+        <ul className="divide-y divide-border/70">
+          {visits.map((visit) => (
+            <li key={visit.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 p-3.5">
+              <span className="font-mono text-[0.85rem] font-bold text-foreground">
+                {visit.ip || "Unknown IP"}
+              </span>
+              <span className="text-[0.85rem] font-semibold text-primary">{visit.path || "/"}</span>
+              <span className="text-[0.8rem] text-muted-foreground">{formatStamp(visit.created_date)}</span>
+              {visit.user_email ? (
+                <span className="text-[0.8rem] text-muted-foreground">· {visit.user_email}</span>
+              ) : null}
+            </li>
+          ))}
+          {visits.length === 0 ? (
+            <li className="p-5 text-center text-[0.9rem] text-muted-foreground">No visits recorded yet.</li>
+          ) : null}
+        </ul>
+      </section>
 
       {formOpen ? (
         <ServiceForm

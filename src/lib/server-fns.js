@@ -150,6 +150,17 @@ export const listReviews = createServerFn({ method: "GET" })
     return page.items || [];
   });
 
+export const listRecentVisits = createServerFn({ method: "GET" })
+  .middleware([requireUser])
+  .validator(z.object({ limit: z.number().min(1).max(100).optional() }).optional())
+  .handler(async ({ data, context }) => {
+    adminOnly(context.user);
+    const page = await context
+      .getBase44()
+      .entities.VisitLog.filter({}, { limit: data?.limit || 40, sort: "-created_date" });
+    return page.items || [];
+  });
+
 const serviceInput = z.object({
   name: z.string().min(2).max(180),
   category: z.enum(CATEGORIES),
