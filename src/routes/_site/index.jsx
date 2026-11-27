@@ -3,6 +3,7 @@ import { ArrowRight, Phone, ShieldAlert, Sparkles } from "lucide-react";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryTiles from "@/components/CategoryTiles";
 import ServiceCard from "@/components/ServiceCard";
+import PiConsultCta from "@/components/PiConsultCta";
 import { CATEGORIES } from "@/lib/georgia-data";
 import { listServices } from "@/lib/server-fns";
 
@@ -168,6 +169,8 @@ function HomePage() {
           ))}
         </div>
       </section>
+
+      <PiConsultCta />
     </>
   );
 }
