@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth-middleware";
 import { CATEGORIES, COST_TYPES, NEEDS, zipToCounties } from "@/lib/georgia-data";
 import { notifyCuratorsOfReview, notifyOwnerOfVisit } from "@/lib/notify.server";
+import { sendProspectEmail } from "@/lib/outreach.server";
 
 const MAX_SERVICES = 400;
 
@@ -399,4 +400,93 @@ export const recordVisit = createServerFn({ method: "POST" })
     }).catch(() => {});
 
     return { notified: true };
+  });
+
+const outreachInput = z.object({
+  prospect_name: z.string().max(120).optional(),
+  prospect_email: z.string().email().max(200),
+  notes: z.string().max(600).optional(),
+});
+
+const OUTREACH_PROMPT = ({ prospectName, notes }) => `You write plain, warm outreach email for Georgia Senior Link, a free statewide directory of services for older adults in Georgia and the people who care for them.
+
+Write one email to ${prospectName || "a prospective community partner"}.
+Reason the curator is reaching out: ${notes || "introduce the directory and invite them to use and share it."}
+
+What the directory offers: listings for meals and food programs, Medicare and health coverage help, caregiver support and respite, housing and utility assistance, transportation, legal aid and elder protection, and senior centers. It covers all Georgia counties, browsing needs no account, people can search by county or ZIP, answer a short needs questionnaire, read and leave community reviews, and suggest a listing of their own. The address is https://georgia-senior-link.base44.app
+
+Rules: 120 to 170 words. Plain language at a sixth grade reading level, respectful and specific, no hype, no exclamation marks, no em dashes, no bullet lists. Open with the person or organization by name. One clear ask at the end. Sign off as "The Georgia Senior Link team". Return a short subject line under 60 characters and the body as plain paragraphs separated by blank lines.`;
+
+export const draftOutreachEmail = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(outreachInput)
+  .handler(async ({ data, context }) => {
+    adminOnly(context.user);
+    const base44 = context.getBase44();
+    const draft = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: OUTREACH_PROMPT({ prospectName: data.prospect_name, notes: data.notes }),
+      response_json_schema: {
+        type: "object",
+        properties: {
+          subject: { type: "string" },
+          body: { type: "string" },
+        },
+        required: ["subject", "body"],
+      },
+    });
+
+    return {
+      subject: String(draft?.subject || "").slice(0, 180),
+      body: String(draft?.body || "").slice(0, 4000),
+    };
+  });
+
+export const sendOutreachEmail = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(
+    outreachInput.extend({
+      subject: z.string().min(3).max(180),
+      body: z.string().min(20).max(4000),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    adminOnly(context.user);
+    const base44 = context.getBase44();
+    const record = {
+      prospect_name: data.prospect_name || "",
+      prospect_email: data.prospect_email,
+      subject: data.subject,
+      body: data.body,
+      sent_by: context.user.email || "",
+      sent_at: new Date().toISOString(),
+    };
+
+    try {
+      const result = await sendProspectEmail(base44, {
+        to: data.prospect_email,
+        subject: data.subject,
+        body: data.body,
+      });
+
+      if (result?.success === false) {
+        throw new Error(result.message || "The mail service refused this address.");
+      }
+
+      await base44.asServiceRole.entities.OutreachEmail.create({ ...record, status: "sent" });
+      return { success: true };
+    } catch (error) {
+      const message = String(error?.message || "The email could not be sent.").slice(0, 300);
+      await base44.asServiceRole.entities.OutreachEmail.create({ ...record, status: "failed", note: message });
+      return { success: false, message };
+    }
+  });
+
+export const listOutreachEmails = createServerFn({ method: "GET" })
+  .middleware([requireUser])
+  .handler(async ({ context }) => {
+    adminOnly(context.user);
+    const page = await context
+      .getBase44()
+      .entities.OutreachEmail.filter({}, { limit: 30, sort: "-created_date" });
+    return page.items || [];
   });

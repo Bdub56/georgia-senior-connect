@@ -1,0 +1,73 @@
+{
+  "name": "OutreachEmail",
+  "type": "object",
+  "properties": {
+    "prospect_name": {
+      "type": "string",
+      "description": "Name of the person or organization being contacted"
+    },
+    "prospect_email": {
+      "type": "string",
+      "description": "Address the outreach was sent to"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject line that went out"
+    },
+    "body": {
+      "type": "string",
+      "description": "Plain-text body that went out"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed"
+      ],
+      "enumColors": [
+        "green",
+        "red"
+      ],
+      "description": "Whether the send succeeded"
+    },
+    "note": {
+      "type": "string",
+      "description": "Failure reason, when a send did not go through"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the send was attempted"
+    },
+    "sent_by": {
+      "type": "string",
+      "description": "Email of the curator who sent it"
+    }
+  },
+  "required": [
+    "prospect_email",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "@tanstack/react-router";
-import { LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { LogOut, Mail, ShieldCheck, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,11 +46,18 @@ export default function AuthMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {user.role === "admin" ? (
-          <DropdownMenuItem asChild>
-            <Link to="/admin" className="cursor-pointer font-semibold">
-              <ShieldCheck className="mr-2 h-4 w-4 text-primary" aria-hidden="true" /> Curator console
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/admin" className="cursor-pointer font-semibold">
+                <ShieldCheck className="mr-2 h-4 w-4 text-primary" aria-hidden="true" /> Curator console
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/outreach" className="cursor-pointer font-semibold">
+                <Mail className="mr-2 h-4 w-4 text-primary" aria-hidden="true" /> Email prospects
+              </Link>
+            </DropdownMenuItem>
+          </>
         ) : null}
         <DropdownMenuItem onSelect={() => logout()} className="cursor-pointer font-semibold">
           <LogOut className="mr-2 h-4 w-4" aria-hidden="true" /> Sign out

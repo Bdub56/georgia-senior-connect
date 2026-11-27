@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus, Pencil, Trash2, Search, ShieldCheck, Loader2, Star, MessageSquare, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ShieldCheck, Loader2, Star, MessageSquare, Check, X, Mail } from "lucide-react";
 import { toast } from "sonner";
 import StarRating from "@/components/StarRating";
 import ServiceForm from "@/components/admin/ServiceForm";
@@ -169,16 +169,24 @@ function AdminPage() {
             community is saying.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
-          className="btn-accent tap inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-bold"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" /> Add a service
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/outreach"
+            className="tap inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-card px-4 py-3 text-[0.9rem] font-bold text-primary hover:bg-secondary"
+          >
+            <Mail className="h-4 w-4" aria-hidden="true" /> Email prospects
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+            className="btn-accent tap inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-bold"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" /> Add a service
+          </button>
+        </div>
       </div>
 
       <dl className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
